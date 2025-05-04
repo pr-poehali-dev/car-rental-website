@@ -1,57 +1,23 @@
-/**
- * Модели данных для взаимодействия с API
- */
-
-// Базовая модель с общими полями
-export interface BaseModel {
-  id: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
-// Модель автомобиля
-export interface Car extends BaseModel {
-  name: string;
+// Модель для автомобиля
+export interface Car {
+  id: number | string;
   brand: string;
   model: string;
   year: number;
   category: string;
-  pricePerDay: number;
-  pricePerWeek?: number;
-  pricePerMonth?: number;
   transmission: 'manual' | 'automatic';
   fuelType: 'petrol' | 'diesel' | 'electric' | 'hybrid';
   seats: number;
+  pricePerDay: number;
+  pricePerWeek?: number;
+  pricePerMonth?: number;
   description: string;
   features: string[];
   images: string[];
   available: boolean;
 }
 
-// Модель пользователя
-export interface User extends BaseModel {
-  email: string;
-  firstName: string;
-  lastName: string;
-  phone?: string;
-  role: 'admin' | 'manager' | 'client';
-  avatar?: string;
-}
-
-// Модель бронирования
-export interface Booking extends BaseModel {
-  carId: number;
-  userId: number;
-  startDate: string;
-  endDate: string;
-  totalPrice: number;
-  status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
-  paymentStatus: 'pending' | 'paid' | 'refunded';
-  car?: Car;
-  user?: User;
-}
-
-// Типы для фильтрации и поиска
+// Фильтры для автомобилей
 export interface CarFilters {
   brand?: string;
   category?: string;
@@ -64,32 +30,68 @@ export interface CarFilters {
   search?: string;
 }
 
-// Тип для создания бронирования
-export interface CreateBookingData {
-  carId: number;
-  startDate: string;
-  endDate: string;
-  clientInfo?: {
-    firstName: string;
-    lastName: string;
-    email: string;
-    phone: string;
-  };
-}
-
-// Типы для авторизации
-export interface LoginData {
+// Информация о клиенте
+export interface ClientInfo {
+  firstName: string;
+  lastName: string;
   email: string;
-  password: string;
+  phone: string;
 }
 
-export interface RegisterData extends LoginData {
+// Статус бронирования
+export type BookingStatus = 
+  | 'pending' // Ожидает подтверждения
+  | 'confirmed' // Подтверждено
+  | 'active' // Активно (автомобиль выдан)
+  | 'completed' // Завершено
+  | 'cancelled' // Отменено
+  | 'rejected'; // Отклонено
+
+// Модель для бронирования
+export interface Booking {
+  id: number | string;
+  carId: number | string;
+  car?: Car; // Связанный автомобиль (может быть подгружен или нет)
+  clientId?: number | string; // ID клиента, если он зарегистрирован
+  clientInfo: ClientInfo; // Информация о клиенте
+  startDate: string; // Дата начала аренды
+  endDate: string; // Дата окончания аренды
+  totalPrice: number; // Общая стоимость
+  status: BookingStatus; // Статус бронирования
+  paymentStatus: 'pending' | 'paid' | 'refunded' | 'failed'; // Статус оплаты
+  createdAt: string; // Дата создания
+  updatedAt: string; // Дата обновления
+  notes?: string; // Примечания
+}
+
+// Фильтры для бронирований
+export interface BookingFilters {
+  carId?: number | string;
+  clientId?: number | string;
+  startDate?: string;
+  endDate?: string;
+  status?: BookingStatus | BookingStatus[];
+  search?: string;
+}
+
+// Модель для пользователя
+export interface User {
+  id: number | string;
+  email: string;
   firstName: string;
   lastName: string;
   phone?: string;
+  role: 'admin' | 'manager' | 'client';
+  createdAt: string;
+  updatedAt: string;
+  lastLogin?: string;
 }
 
-export interface AuthResponse {
-  user: User;
-  token: string;
+// Данные для создания нового бронирования
+export interface CreateBookingData {
+  carId: number | string;
+  startDate: string;
+  endDate: string;
+  clientInfo: ClientInfo;
+  notes?: string;
 }
